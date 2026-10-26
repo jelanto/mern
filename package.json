@@ -1,0 +1,20 @@
+{
+  "name": "finflow-monorepo",
+  "version": "1.0.0",
+  "description": "FinFlow - Premium Full-Stack MERN Personal Finance & Expense Management Web Application",
+  "type": "module",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "test": "npm --prefix server test",
+    "build": "npm --prefix client run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "author": "FinFlow Team",
+  "license": "MIT"
+}
