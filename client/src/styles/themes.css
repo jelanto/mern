@@ -1,0 +1,38 @@
+:root,
+.dark {
+  --fin-bg: #100D10;
+  --fin-sidebar: #151014;
+  --fin-card: #21171D;
+  --fin-card-secondary: #291C23;
+  --fin-card-hover: #31212B;
+  --fin-accent: #E07A5F;
+  --fin-accent-secondary: #C86A78;
+  --fin-accent-glow: rgba(224, 122, 95, 0.25);
+  --fin-text: #F7F0F2;
+  --fin-text-secondary: #B6A7AD;
+  --fin-text-muted: #7E6C75;
+  --fin-border: rgba(255, 255, 255, 0.08);
+  --fin-border-focus: rgba(224, 122, 95, 0.45);
+  --fin-gradient-card: linear-gradient(135deg, #251921 0%, #1A1318 100%);
+  --fin-gradient-accent: linear-gradient(135deg, #E07A5F 0%, #C86A78 100%);
+  --fin-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+}
+
+.light {
+  --fin-bg: #F7F5F2;
+  --fin-sidebar: #FFFFFF;
+  --fin-card: #FFFFFF;
+  --fin-card-secondary: #F3ECE8;
+  --fin-card-hover: #F8F4F1;
+  --fin-accent: #9A384F;
+  --fin-accent-secondary: #C86A78;
+  --fin-accent-glow: rgba(154, 56, 79, 0.18);
+  --fin-text: #211B1E;
+  --fin-text-secondary: #6B5E65;
+  --fin-text-muted: #9C8F96;
+  --fin-border: rgba(0, 0, 0, 0.08);
+  --fin-border-focus: rgba(154, 56, 79, 0.35);
+  --fin-gradient-card: linear-gradient(135deg, #FFFFFF 0%, #FAF6F3 100%);
+  --fin-gradient-accent: linear-gradient(135deg, #9A384F 0%, #C86A78 100%);
+  --fin-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
+}
