@@ -19,10 +19,9 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { formatCurrency } from '../utils/currency.js';
 import { formatDate } from '../utils/date.js';
 import useDebounce from '../hooks/useDebounce.js';
-import initialDemoData from '../data/demoData.js';
 
 export const TransactionsPage = () => {
-  const { currency, isDemoMode } = useAuth();
+  const { currency } = useAuth();
   const { refreshTrigger } = useOutletContext() || {};
 
   const [transactions, setTransactions] = useState([]);
@@ -41,43 +40,6 @@ export const TransactionsPage = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const fetchTransactions = useCallback(async () => {
-    if (isDemoMode) {
-      let filtered = [...initialDemoData.transactions];
-
-      if (typeFilter !== 'all') {
-        filtered = filtered.filter((t) => t.type === typeFilter);
-      }
-      if (categoryFilter !== 'all') {
-        filtered = filtered.filter((t) => t.category === categoryFilter);
-      }
-      if (debouncedSearch) {
-        const query = debouncedSearch.toLowerCase();
-        filtered = filtered.filter(
-          (t) =>
-            t.title.toLowerCase().includes(query) ||
-            (t.merchant && t.merchant.toLowerCase().includes(query)) ||
-            (t.category && t.category.toLowerCase().includes(query))
-        );
-      }
-
-      // Sort
-      filtered.sort((a, b) => {
-        if (sortBy === 'amount') {
-          return sortOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount;
-        }
-        return sortOrder === 'asc'
-          ? new Date(a.transactionDate) - new Date(b.transactionDate)
-          : new Date(b.transactionDate) - new Date(a.transactionDate);
-      });
-
-      setTotalRecords(filtered.length);
-      setTotalPages(Math.ceil(filtered.length / 10) || 1);
-      const start = (page - 1) * 10;
-      setTransactions(filtered.slice(start, start + 10));
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await transactionApi.getTransactions({
@@ -91,17 +53,19 @@ export const TransactionsPage = () => {
       });
 
       if (res.success) {
-        setTransactions(res.data);
-        setTotalPages(res.pagination.totalPages);
-        setTotalRecords(res.pagination.total);
+        setTransactions(res.data || []);
+        setTotalPages(res.pagination?.totalPages || 1);
+        setTotalRecords(res.pagination?.total || 0);
       }
     } catch (err) {
-      console.warn('Failed to load transactions, using cached demo data:', err.message);
-      setTransactions(initialDemoData.transactions);
+      console.warn('Failed to load transactions:', err.message);
+      setTransactions([]);
+      setTotalPages(1);
+      setTotalRecords(0);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, typeFilter, categoryFilter, sortBy, sortOrder, page, isDemoMode]);
+  }, [debouncedSearch, typeFilter, categoryFilter, sortBy, sortOrder, page]);
 
   useEffect(() => {
     fetchTransactions();
@@ -109,13 +73,8 @@ export const TransactionsPage = () => {
 
   const handleDelete = async (id) => {
     try {
-      if (isDemoMode) {
-        initialDemoData.transactions = initialDemoData.transactions.filter((t) => t._id !== id);
-        fetchTransactions();
-      } else {
-        await transactionApi.deleteTransaction(id);
-        fetchTransactions();
-      }
+      await transactionApi.deleteTransaction(id);
+      fetchTransactions();
       setDeleteConfirmId(null);
     } catch (err) {
       alert(err.message || 'Error deleting transaction');
@@ -123,32 +82,10 @@ export const TransactionsPage = () => {
   };
 
   const handleExportCsv = () => {
-    if (isDemoMode) {
-      // Direct client CSV generation in demo mode
-      const headers = ['Date', 'Type', 'Category', 'Merchant', 'Title', 'Amount', 'Currency', 'Payment Method'];
-      const rows = initialDemoData.transactions.map((t) => [
-        t.transactionDate.split('T')[0],
-        t.type,
-        `"${t.category}"`,
-        `"${t.merchant || ''}"`,
-        `"${t.title}"`,
-        t.amount,
-        t.currency,
-        t.paymentMethod,
-      ]);
-      const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `finflow-ledger-${Date.now()}.csv`;
-      a.click();
-    } else {
-      window.location.href = transactionApi.getExportUrl({
-        type: typeFilter !== 'all' ? typeFilter : undefined,
-        category: categoryFilter !== 'all' ? categoryFilter : undefined,
-      });
-    }
+    window.location.href = transactionApi.getExportUrl({
+      type: typeFilter !== 'all' ? typeFilter : undefined,
+      category: categoryFilter !== 'all' ? categoryFilter : undefined,
+    });
   };
 
   const categories = [

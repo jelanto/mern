@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, Lock, Mail, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
+import { TrendingUp, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 
@@ -10,7 +10,7 @@ export const LoginPage = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const { login, enterDemoMode } = useAuth();
+  const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -27,11 +27,6 @@ export const LoginPage = () => {
     } else {
       setError(res.message);
     }
-  };
-
-  const handleDemoLogin = () => {
-    enterDemoMode();
-    navigate('/dashboard');
   };
 
   return (
@@ -117,23 +112,7 @@ export const LoginPage = () => {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="relative flex items-center justify-center my-4">
-            <div className="border-t border-fin-border w-full" />
-            <span className="bg-fin-card px-3 text-[11px] text-fin-text-muted uppercase tracking-wider relative">
-              Or Explore Instantly
-            </span>
-          </div>
 
-          {/* 1-Click Demo Sandbox Mode */}
-          <button
-            type="button"
-            onClick={handleDemoLogin}
-            className="w-full py-2.5 rounded-xl bg-fin-card-secondary hover:bg-fin-card-hover border border-fin-border hover:border-fin-accent text-fin-text text-xs font-semibold transition-all flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>1-Click Demo as Rajiv Sharma</span>
-          </button>
 
           <p className="text-center text-xs text-fin-text-secondary pt-2">
             Don't have an account?{' '}

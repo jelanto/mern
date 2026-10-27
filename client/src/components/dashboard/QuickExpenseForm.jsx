@@ -3,10 +3,9 @@ import { Send, Zap, Check, AlertCircle } from 'lucide-react';
 import { transactionApi } from '../../api/transactionApi.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { getCurrencySymbol } from '../../utils/currency.js';
-import initialDemoData from '../../data/demoData.js';
 
 export const QuickExpenseForm = ({ onSuccess }) => {
-  const { currency, isDemoMode } = useAuth();
+  const { currency } = useAuth();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
   const [category, setCategory] = useState('Food & Dining');
@@ -54,27 +53,11 @@ export const QuickExpenseForm = ({ onSuccess }) => {
     };
 
     try {
-      if (isDemoMode) {
-        const newTx = {
-          _id: `tx-${Date.now()}`,
-          ...payload,
-          currency,
-          status: 'completed',
-        };
-        initialDemoData.transactions.unshift(newTx);
-        initialDemoData.summary.monthlyOutflow += numAmount;
-        initialDemoData.summary.netWorth -= numAmount;
-        setAmount('');
-        setMerchant('');
-        setSuccessMsg('Logged successfully to Demo Ledger!');
-        if (onSuccess) onSuccess();
-      } else {
-        await transactionApi.createTransaction(payload);
-        setAmount('');
-        setMerchant('');
-        setSuccessMsg('Logged successfully!');
-        if (onSuccess) onSuccess();
-      }
+      await transactionApi.createTransaction(payload);
+      setAmount('');
+      setMerchant('');
+      setSuccessMsg('Logged successfully to ledger!');
+      if (onSuccess) onSuccess();
 
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {

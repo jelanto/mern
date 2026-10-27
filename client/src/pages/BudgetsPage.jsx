@@ -3,10 +3,10 @@ import { Plus, PiggyBank, AlertTriangle, CheckCircle2, Trash2, X, AlertCircle } 
 import { budgetApi } from '../api/budgetApi.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { formatCurrency, getCurrencySymbol } from '../utils/currency.js';
-import initialDemoData from '../data/demoData.js';
+
 
 export const BudgetsPage = () => {
-  const { currency, isDemoMode } = useAuth();
+  const { currency } = useAuth();
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,21 +19,15 @@ export const BudgetsPage = () => {
   const [formError, setFormError] = useState(null);
 
   const fetchBudgets = async () => {
-    if (isDemoMode) {
-      setBudgets([...initialDemoData.budgets]);
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await budgetApi.getBudgets();
       if (res.success) {
-        setBudgets(res.data);
+        setBudgets(res.data || []);
       }
     } catch (err) {
-      console.warn('Budget fetch fallback to demo:', err.message);
-      setBudgets(initialDemoData.budgets);
+      console.warn('Budget fetch error:', err.message);
+      setBudgets([]);
     } finally {
       setLoading(false);
     }
@@ -41,7 +35,7 @@ export const BudgetsPage = () => {
 
   useEffect(() => {
     fetchBudgets();
-  }, [isDemoMode]);
+  }, []);
 
   const handleCreateBudget = async (e) => {
     e.preventDefault();
@@ -54,32 +48,13 @@ export const BudgetsPage = () => {
     }
 
     try {
-      if (isDemoMode) {
-        const newB = {
-          _id: `b-${Date.now()}`,
-          name: name.trim(),
-          category,
-          limitAmount: limit,
-          totalSpent: 0,
-          remaining: limit,
-          percentageSpent: 0,
-          currency,
-          period: 'monthly',
-          alertThreshold,
-          isOverBudget: false,
-        };
-        initialDemoData.budgets.push(newB);
-        setBudgets([...initialDemoData.budgets]);
-      } else {
-        await budgetApi.createBudget({
-          name: name.trim(),
-          category,
-          limitAmount: limit,
-          alertThreshold,
-        });
-        await fetchBudgets();
-      }
-
+      await budgetApi.createBudget({
+        name: name.trim(),
+        category,
+        limitAmount: limit,
+        alertThreshold,
+      });
+      await fetchBudgets();
       setIsModalOpen(false);
       setName('');
       setLimitAmount('');
@@ -91,13 +66,8 @@ export const BudgetsPage = () => {
   const handleDeleteBudget = async (id) => {
     if (!window.confirm('Are you sure you want to delete this budget envelope?')) return;
     try {
-      if (isDemoMode) {
-        initialDemoData.budgets = initialDemoData.budgets.filter((b) => b._id !== id);
-        setBudgets([...initialDemoData.budgets]);
-      } else {
-        await budgetApi.deleteBudget(id);
-        await fetchBudgets();
-      }
+      await budgetApi.deleteBudget(id);
+      await fetchBudgets();
     } catch (err) {
       alert(err.message || 'Failed to delete budget');
     }

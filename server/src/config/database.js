@@ -18,18 +18,29 @@ export const connectDatabase = async () => {
     
     // Set connection options
     const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 4000,
-      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 45000,
+      family: 4,
+      maxPoolSize: 10,
     });
 
     isConnected = true;
     console.log(`[FinFlow Database] MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);
+
+    mongoose.connection.on('disconnected', () => {
+      isConnected = false;
+      console.warn('[FinFlow Database Warning] MongoDB disconnected. Attempting automatic reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      isConnected = true;
+      console.log('[FinFlow Database] MongoDB reconnected successfully.');
+    });
+
     return conn;
   } catch (error) {
     isConnected = false;
-    console.warn(`[FinFlow Database Warning] Unable to connect to MongoDB at ${mongoUri}.`);
-    console.warn(`[FinFlow Database Info] Error: ${error.message}`);
-    console.warn(`[FinFlow Database Info] To enable full database persistence, ensure MongoDB is running locally or set MONGODB_URI in server/.env to your MongoDB Atlas connection string.`);
+    console.warn(`[FinFlow Database Warning] Unable to connect to MongoDB: ${error.message}`);
     console.warn(`[FinFlow Database Info] Server is running with health check and graceful fallback capability.`);
     return null;
   }

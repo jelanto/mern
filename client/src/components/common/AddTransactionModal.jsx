@@ -3,7 +3,6 @@ import { X, ArrowDownRight, ArrowUpRight, ArrowLeftRight, Check, AlertCircle } f
 import { transactionApi } from '../../api/transactionApi.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { getCurrencySymbol } from '../../utils/currency.js';
-import initialDemoData from '../../data/demoData.js';
 
 const CATEGORIES = {
   expense: [
@@ -23,7 +22,7 @@ const CATEGORIES = {
 };
 
 export const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
-  const { currency, isDemoMode } = useAuth();
+  const { currency } = useAuth();
   const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [title, setTitle] = useState('');
@@ -73,29 +72,9 @@ export const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     };
 
     try {
-      if (isDemoMode) {
-        // Create demo entry reactively
-        const newDemoTx = {
-          _id: `tx-${Date.now()}`,
-          ...payload,
-          currency,
-          status: 'completed',
-        };
-        initialDemoData.transactions.unshift(newDemoTx);
-        if (type === 'expense') {
-          initialDemoData.summary.monthlyOutflow += numAmount;
-          initialDemoData.summary.netWorth -= numAmount;
-        } else if (type === 'income') {
-          initialDemoData.summary.monthlyInflow += numAmount;
-          initialDemoData.summary.netWorth += numAmount;
-        }
-        if (onSuccess) onSuccess();
-        onClose();
-      } else {
-        await transactionApi.createTransaction(payload);
-        if (onSuccess) onSuccess();
-        onClose();
-      }
+      await transactionApi.createTransaction(payload);
+      if (onSuccess) onSuccess();
+      onClose();
     } catch (err) {
       setError(err.message || 'Failed to record transaction. Please try again.');
     } finally {

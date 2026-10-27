@@ -14,56 +14,46 @@ import {
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { settingsApi } from '../api/settingsApi.js';
-import initialDemoData from '../data/demoData.js';
 import { formatCurrency } from '../utils/currency.js';
 
 export const SettingsPage = () => {
-  const { user, currency, isDemoMode, updateUserProfile } = useAuth();
+  const { user, currency, updateUserProfile } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  const [name, setName] = useState(user?.name || 'Rajiv Sharma');
+  const [name, setName] = useState(user?.name || '');
   const [preferredCurrency, setPreferredCurrency] = useState(currency || 'INR');
   const [defaultDateRange, setDefaultDateRange] = useState('30d');
-  const [accounts, setAccounts] = useState(initialDemoData.accounts);
+  const [accounts, setAccounts] = useState([]);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (!isDemoMode) {
-      settingsApi.getSettings().then((res) => {
-        if (res.success && res.data) {
-          if (res.data.user) {
-            setName(res.data.user.name);
-            setPreferredCurrency(res.data.user.preferredCurrency || 'INR');
-            setDefaultDateRange(res.data.user.defaultDateRange || '30d');
-          }
-          if (res.data.accounts) {
-            setAccounts(res.data.accounts);
-          }
+    settingsApi.getSettings().then((res) => {
+      if (res.success && res.data) {
+        if (res.data.user) {
+          setName(res.data.user.name || '');
+          setPreferredCurrency(res.data.user.preferredCurrency || 'INR');
+          setDefaultDateRange(res.data.user.defaultDateRange || '30d');
         }
-      }).catch((e) => console.warn('Settings load error:', e));
-    }
-  }, [isDemoMode]);
+        if (res.data.accounts) {
+          setAccounts(res.data.accounts || []);
+        }
+      }
+    }).catch((e) => console.warn('Settings load error:', e));
+  }, []);
 
   const handleSavePreferences = async (e) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      if (isDemoMode) {
-        initialDemoData.user.name = name;
-        initialDemoData.user.preferredCurrency = preferredCurrency;
-        initialDemoData.user.defaultDateRange = defaultDateRange;
-        updateUserProfile({ name, preferredCurrency, defaultDateRange });
-      } else {
-        await settingsApi.updateSettings({
-          name,
-          preferredCurrency,
-          defaultDateRange,
-          themePreference: theme,
-        });
-        updateUserProfile({ name, preferredCurrency, defaultDateRange });
-      }
+      await settingsApi.updateSettings({
+        name,
+        preferredCurrency,
+        defaultDateRange,
+        themePreference: theme,
+      });
+      updateUserProfile({ name, preferredCurrency, defaultDateRange });
 
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);

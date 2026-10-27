@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authApi from '../api/authApi.js';
-import initialDemoData from '../data/demoData.js';
 
 const AuthContext = createContext();
 
@@ -8,19 +7,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('finflow_token'));
   const [isLoading, setIsLoading] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return localStorage.getItem('finflow_demo_mode') === 'true';
-  });
 
-  // Verify stored session or load demo mode on initialization
+  // Clean out any legacy demo flags
+  useEffect(() => {
+    localStorage.removeItem('finflow_demo_mode');
+  }, []);
+
+  // Verify stored session on initialization
   useEffect(() => {
     const initializeAuth = async () => {
-      if (isDemoMode) {
-        setUser(initialDemoData.user);
-        setIsLoading(false);
-        return;
-      }
-
       const storedToken = localStorage.getItem('finflow_token');
       if (storedToken) {
         try {
@@ -39,14 +34,13 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, [isDemoMode]);
+  }, []);
 
   const handleLogoutClean = () => {
     localStorage.removeItem('finflow_token');
     localStorage.removeItem('finflow_demo_mode');
     setToken(null);
     setUser(null);
-    setIsDemoMode(false);
   };
 
   const login = async (email, password) => {
@@ -58,7 +52,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('finflow_demo_mode');
         setToken(res.token);
         setUser(res.user);
-        setIsDemoMode(false);
         return { success: true };
       }
       return { success: false, message: res.message || 'Login failed' };
@@ -78,7 +71,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('finflow_demo_mode');
         setToken(res.token);
         setUser(res.user);
-        setIsDemoMode(false);
         return { success: true };
       }
       return { success: false, message: res.message || 'Registration failed' };
@@ -91,7 +83,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (!isDemoMode && token) {
+      if (token) {
         await authApi.logout();
       }
     } catch (e) {
@@ -99,14 +91,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       handleLogoutClean();
     }
-  };
-
-  const enterDemoMode = () => {
-    localStorage.removeItem('finflow_token');
-    localStorage.setItem('finflow_demo_mode', 'true');
-    setToken('demo-token-active');
-    setUser(initialDemoData.user);
-    setIsDemoMode(true);
   };
 
   const updateUserProfile = (updatedFields) => {
@@ -122,12 +106,11 @@ export const AuthProvider = ({ children }) => {
         token,
         isAuthenticated: !!user,
         isLoading,
-        isDemoMode,
+        isDemoMode: false,
         currency,
         login,
         register,
         logout,
-        enterDemoMode,
         updateUserProfile,
       }}
     >

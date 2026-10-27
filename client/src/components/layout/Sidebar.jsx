@@ -15,7 +15,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 
 export const Sidebar = () => {
-  const { user, logout, isDemoMode } = useAuth();
+  const { user, logout } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
@@ -101,13 +101,6 @@ export const Sidebar = () => {
 
       {/* User Profile & Logout Footer */}
       <div className="p-4 border-t border-fin-border">
-        {isDemoMode && (
-          <div className="mb-3 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] font-medium text-amber-400 flex items-center justify-between">
-            <span>Demo Sandbox Mode</span>
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          </div>
-        )}
-
         <div className="flex items-center justify-between p-2 rounded-xl bg-fin-card/60 border border-fin-border/60">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-fin-accent/80 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow">

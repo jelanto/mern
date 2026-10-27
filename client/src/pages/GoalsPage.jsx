@@ -14,10 +14,8 @@ import { goalApi } from '../api/goalApi.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { formatCurrency, getCurrencySymbol } from '../utils/currency.js';
 import { formatDate } from '../utils/date.js';
-import initialDemoData from '../data/demoData.js';
-
 export const GoalsPage = () => {
-  const { currency, isDemoMode } = useAuth();
+  const { currency } = useAuth();
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,21 +35,15 @@ export const GoalsPage = () => {
   const [contribNote, setContribNote] = useState('');
 
   const fetchGoals = async () => {
-    if (isDemoMode) {
-      setGoals([...initialDemoData.goals]);
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await goalApi.getGoals();
       if (res.success) {
-        setGoals(res.data);
+        setGoals(res.data || []);
       }
     } catch (err) {
-      console.warn('Goals fetch fallback to demo:', err.message);
-      setGoals(initialDemoData.goals);
+      console.warn('Goals fetch error:', err.message);
+      setGoals([]);
     } finally {
       setLoading(false);
     }
@@ -59,7 +51,7 @@ export const GoalsPage = () => {
 
   useEffect(() => {
     fetchGoals();
-  }, [isDemoMode]);
+  }, []);
 
   const handleCreateGoal = async (e) => {
     e.preventDefault();
@@ -77,34 +69,14 @@ export const GoalsPage = () => {
     }
 
     try {
-      if (isDemoMode) {
-        const cur = parseFloat(initialAmount) || 0;
-        const newGoal = {
-          _id: `g-${Date.now()}`,
-          title: title.trim(),
-          targetAmount: target,
-          currentAmount: cur,
-          percentage: target > 0 ? Math.round((cur / target) * 100) : 0,
-          remaining: Math.max(0, target - cur),
-          currency,
-          targetDate,
-          category,
-          color: '#E07A5F',
-          status: 'in_progress',
-          contributions: cur > 0 ? [{ _id: 'c-new', amount: cur, note: 'Initial deposit', date: new Date().toISOString() }] : [],
-        };
-        initialDemoData.goals.push(newGoal);
-        setGoals([...initialDemoData.goals]);
-      } else {
-        await goalApi.createGoal({
-          title: title.trim(),
-          targetAmount: target,
-          currentAmount: parseFloat(initialAmount) || 0,
-          targetDate,
-          category,
-        });
-        await fetchGoals();
-      }
+      await goalApi.createGoal({
+        title: title.trim(),
+        targetAmount: target,
+        currentAmount: parseFloat(initialAmount) || 0,
+        targetDate,
+        category,
+      });
+      await fetchGoals();
 
       setIsNewGoalOpen(false);
       setTitle('');
@@ -122,33 +94,12 @@ export const GoalsPage = () => {
     if (isNaN(amt) || amt <= 0) return;
 
     try {
-      if (isDemoMode) {
-        const targetG = initialDemoData.goals.find((g) => g._id === contributionGoal._id);
-        if (targetG) {
-          if (contribType === 'deposit') {
-            targetG.currentAmount += amt;
-          } else {
-            targetG.currentAmount = Math.max(0, targetG.currentAmount - amt);
-          }
-          targetG.percentage = Math.min(100, Math.round((targetG.currentAmount / targetG.targetAmount) * 100));
-          targetG.remaining = Math.max(0, targetG.targetAmount - targetG.currentAmount);
-          targetG.contributions.unshift({
-            _id: `c-${Date.now()}`,
-            amount: amt,
-            type: contribType,
-            note: contribNote || `${contribType} transfer`,
-            date: new Date().toISOString(),
-          });
-        }
-        setGoals([...initialDemoData.goals]);
-      } else {
-        await goalApi.addContribution(contributionGoal._id, {
-          amount: amt,
-          type: contribType,
-          note: contribNote,
-        });
-        await fetchGoals();
-      }
+      await goalApi.addContribution(contributionGoal._id, {
+        amount: amt,
+        type: contribType,
+        note: contribNote,
+      });
+      await fetchGoals();
 
       setContributionGoal(null);
       setContribAmount('');
@@ -161,13 +112,8 @@ export const GoalsPage = () => {
   const handleDeleteGoal = async (id) => {
     if (!window.confirm('Delete this savings vault goal?')) return;
     try {
-      if (isDemoMode) {
-        initialDemoData.goals = initialDemoData.goals.filter((g) => g._id !== id);
-        setGoals([...initialDemoData.goals]);
-      } else {
-        await goalApi.deleteGoal(id);
-        await fetchGoals();
-      }
+      await goalApi.deleteGoal(id);
+      await fetchGoals();
     } catch (err) {
       alert(err.message || 'Failed to delete goal');
     }
