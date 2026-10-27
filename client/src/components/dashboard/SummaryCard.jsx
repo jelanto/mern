@@ -47,7 +47,7 @@ export const SummaryCard = ({
 
       {/* Footer Trend or Subtext */}
       <div className="flex items-center justify-between text-[11px] pt-1">
-        {delta !== undefined ? (
+        {delta !== undefined && delta !== 0 ? (
           <div className="flex items-center gap-1">
             <span
               className={`inline-flex items-center font-bold ${
@@ -70,7 +70,7 @@ export const SummaryCard = ({
             <span className="text-fin-text-muted">vs last cycle</span>
           </div>
         ) : (
-          <span className="text-fin-text-muted">{subtext}</span>
+          <span className="text-fin-text-muted">{subtext || 'Active cycle'}</span>
         )}
       </div>
     </div>

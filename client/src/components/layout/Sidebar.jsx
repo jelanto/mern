@@ -78,22 +78,16 @@ export const Sidebar = () => {
 
         {/* Financial Health Mini-Widget */}
         <div className="pt-6">
-          <div className="p-4 rounded-2xl bg-fin-card border border-fin-border space-y-3">
+          <div className="p-4 rounded-2xl bg-fin-card border border-fin-border space-y-2">
             <div className="flex items-center justify-between text-xs font-medium">
               <span className="flex items-center gap-1.5 text-fin-text">
                 <Sparkles className="w-3.5 h-3.5 text-fin-accent" />
-                Financial Pulse
+                Vault Engine
               </span>
-              <span className="font-bold text-emerald-400">92%</span>
-            </div>
-            <div className="w-full bg-fin-card-secondary h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-fin-accent to-emerald-400 h-full rounded-full transition-all duration-500"
-                style={{ width: '92%' }}
-              />
+              <span className="font-bold text-emerald-400">Live</span>
             </div>
             <p className="text-[11px] text-fin-text-muted leading-tight">
-              Cash flow velocity & savings are optimal this cycle.
+              Real-time portfolio synchronized with MongoDB Cloud.
             </p>
           </div>
         </div>

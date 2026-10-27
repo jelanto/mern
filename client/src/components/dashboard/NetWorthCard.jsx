@@ -6,7 +6,7 @@ export const NetWorthCard = ({ summary, currency }) => {
   const netWorth = summary?.netWorth || 0;
   const assets = summary?.assets || 0;
   const liabilities = summary?.liabilities || 0;
-  const delta = summary?.deltas?.netWorth || 4.8;
+  const delta = summary?.deltas?.netWorth !== undefined ? summary.deltas.netWorth : 0;
   const isPositive = delta >= 0;
 
   return (
@@ -21,16 +21,18 @@ export const NetWorthCard = ({ summary, currency }) => {
             <span className="text-xs font-bold uppercase tracking-wider text-fin-text-muted">
               Total Net Worth
             </span>
-            <span
-              className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                isPositive
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-              }`}
-            >
-              {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-              {Math.abs(delta)}%
-            </span>
+            {delta !== 0 && (
+              <span
+                className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                  isPositive
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                }`}
+              >
+                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                {Math.abs(delta)}%
+              </span>
+            )}
           </div>
 
           <div className="text-3xl lg:text-4xl font-extrabold tracking-tight text-fin-text">

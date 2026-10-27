@@ -58,33 +58,24 @@ export const register = async (req, res, next) => {
       themePreference: 'dark',
     });
 
-    // Create default accounts for new user
+    // Create default clean accounts for new user (0 balance)
     await Account.create([
       {
         userId: newUser._id,
         name: 'Primary Checking',
         type: 'bank',
-        balance: 45300,
+        balance: 0,
         currency: preferredCurrency,
-        institution: 'HDFC / Global Reserve',
+        institution: 'Primary Account',
         isDefault: true,
       },
       {
         userId: newUser._id,
-        name: 'High Yield Savings',
+        name: 'Savings Vault',
         type: 'savings',
-        balance: 14750,
+        balance: 0,
         currency: preferredCurrency,
         institution: 'FinFlow Vault',
-        isDefault: false,
-      },
-      {
-        userId: newUser._id,
-        name: 'Platinum Credit Card',
-        type: 'credit',
-        balance: -2100, // credit liability
-        currency: preferredCurrency,
-        institution: 'FinFlow Card',
         isDefault: false,
       },
     ]);
